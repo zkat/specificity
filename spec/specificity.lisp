@@ -32,6 +32,14 @@
     (is (specp (find-spec 'test-spec)))
     (remove-spec 'test-spec)))
 
+(spec find-spec
+  (it "should return a spec object for existing specs."
+    (spec test-spec)
+    (is (specp (find-spec 'test-spec)))
+    (remove-spec 'test-spec))
+  (it "should return NIL when no such spec exists."
+    (is (null (find-spec 'test-spec)))))
+
 (spec remove-spec
   (it "should remove specs, by name."
     (spec test-spec)
