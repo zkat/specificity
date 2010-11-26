@@ -1,5 +1,10 @@
 (in-package #:specificity)
 
+(def-spec-group specificity)
+(def-spec-group spec :in specificity)
+
+(in-spec-group spec)
+
 (spec spec
   (it "should allow you to define a basic spec with just a name."
     (spec test-spec)
@@ -61,3 +66,5 @@
     (spec test-spec)
     (is (run-spec 'test-spec))))
 
+(def-spec-group expectations :in specificity)
+(in-spec-group expectations)
