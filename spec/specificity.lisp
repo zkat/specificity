@@ -16,6 +16,27 @@
       (spec test-spec)
       (is (not (eql old-spec (find-spec 'test-spec)))))))
 
+(spec it
+  (it "should be callable from within the SPEC macro."
+    (finishesp (spec test-spec (it "should be callable from within the SPEC macro.")))
+    (remove-spec 'test-spec))
+  (it "should signal an error if called outside of the SPEC macro."
+    (signalsp 'error (it "should signal an error if called outside of the SPEC macro.")))
+  (it "must require a first argument describing its purpose, erroring if it does not receive one."
+    (signalsp 'error (spec test-spec (it)))
+    (remove-spec 'test-spec)
+    (finishesp (spec test-spec (it "requires a description")))
+    (remove-spec 'test-spec))
+  (it "must define an expectation for the spec."
+    (spec test-spec (it "is expected"))
+    (is (expectationp (elt (spec-expectations (find-spec 'test-spec)) 0)))
+    (remove-spec 'test-spec))
+  (it "must use the first argument as the expectation's description."
+    (spec test-spec (it "checkme"))
+    (let ((expectation (elt (spec-expectations (find-spec 'test-spec)) 0)))
+      (is (string= "checkme" (description expectation))))
+    (remove-spec 'test-spec)))
+
 (spec specp
   (it "should return true when passed a spec object."
     (spec test-spec)
