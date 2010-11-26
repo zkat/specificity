@@ -1,5 +1,3 @@
-;;;; package.lisp
-
 (defpackage #:specificity
-  (:use #:cl))
+  (:use #:cl #:alexandria))
 
