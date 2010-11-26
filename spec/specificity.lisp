@@ -19,27 +19,11 @@
     (spec test-spec)
     (let ((old-spec (find-spec 'test-spec)))
       (spec test-spec)
-      (is (not (eql old-spec (find-spec 'test-spec)))))))
-
-(spec it
-  (it "should be callable from within the SPEC macro."
-    (finishesp (spec test-spec (it "should be callable from within the SPEC macro.")))
+      (is (not (eql old-spec (find-spec 'test-spec)))))
     (remove-spec 'test-spec))
-  (it "should signal an error if called outside of the SPEC macro."
-    (signalsp 'error (it "should signal an error if called outside of the SPEC macro.")))
-  (it "must require a first argument describing its purpose, erroring if it does not receive one."
-    (signalsp 'error (spec test-spec (it)))
-    (remove-spec 'test-spec)
-    (finishesp (spec test-spec (it "requires a description")))
-    (remove-spec 'test-spec))
-  (it "must define an expectation for the spec."
-    (spec test-spec (it "is expected"))
-    (is (expectationp (elt (spec-expectations (find-spec 'test-spec)) 0)))
-    (remove-spec 'test-spec))
-  (it "must use the first argument as the expectation's description."
-    (spec test-spec (it "checkme"))
-    (let ((expectation (elt (spec-expectations (find-spec 'test-spec)) 0)))
-      (is (string= "checkme" (description expectation))))
+  (it "should allow an optional docstring right after the name."
+    (spec test-spec "checkme")
+    (is (string= "checkme" (description (find-spec 'test-spec))))
     (remove-spec 'test-spec)))
 
 (spec specp
@@ -68,3 +52,36 @@
 
 (def-spec-group expectations :in specificity)
 (in-spec-group expectations)
+
+(spec it
+  (it "should be callable from within the SPEC macro."
+    (finishesp (spec test-spec (it "should be callable from within the SPEC macro.")))
+    (remove-spec 'test-spec))
+  (it "should signal an error if called outside of the SPEC macro."
+    (signalsp 'error (it "should signal an error if called outside of the SPEC macro.")))
+  (it "must require a first argument describing its purpose, erroring if it does not receive one."
+    (signalsp 'error (spec test-spec (it)))
+    (remove-spec 'test-spec)
+    (finishesp (spec test-spec (it "requires a description")))
+    (remove-spec 'test-spec))
+  (it "should allow expectations defined with a null body."
+    (finishesp (spec test-spec (it "Spec goes here.")))
+    (remove-spec 'test-spec))
+  (it "must define an expectation for the spec."
+    (spec test-spec (it "is expected"))
+    (is (expectationp (elt (spec-expectations (find-spec 'test-spec)) 0)))
+    (remove-spec 'test-spec))
+  (it "must use the first argument as the expectation's description."
+    (spec test-spec (it "checkme"))
+    (let ((expectation (elt (spec-expectations (find-spec 'test-spec)) 0)))
+      (is (string= "checkme" (description expectation))))
+    (remove-spec 'test-spec)))
+
+(spec spec-expectations)
+
+(spec expectationp
+  (it "should return true when passed an expectation object."
+    (spec test-spec)
+    (let ((expectation (elt (spec-expectations (find-spec 'test-spec)) 0)))
+      (is (expectationp expectation)))
+    (remove-spec 'test-spec)))
