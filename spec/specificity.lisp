@@ -74,15 +74,15 @@
     (spec test-spec)
     (is (resultp (run-spec 'test-spec)))))
 
-(spec spec-expectations)
+(spec spec-examples)
 
 (def-spec-group results :in specificity)
 (in-spec-group results)
 
 (spec resultp)
 
-(def-spec-group expectations :in specificity)
-(in-spec-group expectations)
+(def-spec-group examples :in specificity)
+(in-spec-group examples)
 
 (spec it
   (it "should be callable from within the SPEC macro."
@@ -95,43 +95,55 @@
     (remove-spec 'test-spec)
     (finishes (spec test-spec (it "requires a description")))
     (remove-spec 'test-spec))
-  (it "should allow expectations defined with a null body."
+  (it "should allow examples defined with a null body."
     (finishes (spec test-spec (it "Spec goes here.")))
     (remove-spec 'test-spec))
-  (it "must define an expectation for the spec."
+  (it "must define an example for the spec."
     (spec test-spec (it "is expected"))
-    (is (expectationp (elt (spec-expectations (find-spec 'test-spec)) 0)))
+    (is (examplep (elt (spec-examples (find-spec 'test-spec)) 0)))
     (remove-spec 'test-spec))
-  (it "must use the first argument as the expectation's description."
+  (it "must use the first argument as the example's description."
     (spec test-spec (it "checkme"))
-    (let ((expectation (elt (spec-expectations (find-spec 'test-spec)) 0)))
-      (is (string= "checkme" (description expectation))))
+    (let ((example (elt (spec-examples (find-spec 'test-spec)) 0)))
+      (is (string= "checkme" (description example))))
     (remove-spec 'test-spec)))
 
-(spec run-expectation)
+(spec run-example
+  (it "should allow you to execute an example object."
+    (let ((example (make-example "description" (lambda () t))))
+      (finishes (run-example example))))
+  (it "should return an object representing the results of executing the example."
+    (let ((example (make-example "description" (lambda () t))))
+      (is (resultp (run-example example))))))
 
-(spec expectation-lambda
+(spec make-example
+  (it "should require a description and an example function."
+    (signals error (make-example))
+    (signals error (make-example "foo"))
+    (finishes (make-example "foo" (lambda () t))))
+  (it "should return an example object."
+    (is (examplep (make-example "foo" (lambda () t))))))
+
+(spec example-function
   (it "should return a function."
-    (spec test-spec (is "an expectation"))
+    (spec test-spec (is "an example"))
     (let* ((spec (find-spec 'test-spec))
-           (expectation (elt (spec-expectations spec) 0)))
-      (is (functionp (expectation-lambda expectation))))
+           (example (elt (spec-examples spec) 0)))
+      (is (functionp (example-function example))))
     (remove-spec 'test-spec))
   (it "should capture its definition environment."
     (let ((value nil))
       (let ((x 'sentinel))
-        (spec test-spec (is "an expectation" (setf value x))))
+        (spec test-spec (is "an example" (setf value x))))
       (let ((spec (find-spec 'test-spec))
-            (expectation (elt (spec-expectations spec) 0)))
-        (funcall (expectation-lambda expectation))
+            (example (elt (spec-examples spec) 0)))
+        (funcall (example-function example))
         (is (eq 'sentinel value))))
     (remove-spec 'test-spec)))
 
-(spec expectation-results)
-
-(spec expectationp
-  (it "should return true when passed an expectation object."
+(spec examplep
+  (it "should return true when passed an example object."
     (spec test-spec)
-    (let ((expectation (elt (spec-expectations (find-spec 'test-spec)) 0)))
-      (is (expectationp expectation)))
+    (let ((example (elt (spec-examples (find-spec 'test-spec)) 0)))
+      (is (examplep example)))
     (remove-spec 'test-spec)))
