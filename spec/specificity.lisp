@@ -72,7 +72,14 @@
     (is (functionp #'run-spec)))
   (it "should return an object representing the execution results."
     (spec test-spec)
-    (is (run-spec 'test-spec))))
+    (is (resultp (run-spec 'test-spec)))))
+
+(spec spec-expectations)
+
+(def-spec-group results :in specificity)
+(in-spec-group results)
+
+(spec resultp)
 
 (def-spec-group expectations :in specificity)
 (in-spec-group expectations)
