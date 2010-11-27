@@ -10,9 +10,22 @@
 (defmacro spec (name &body body)
   `(progn ,name ,@body))
 
-(defun find-spec (name))
-(defun ensure-spec (name))
-(defun remove-spec (name))
+(defparameter *specs* (make-hash-table :test 'eq))
+(defun find-spec (name)
+  (values (gethash name *specs*)))
+
+(defclass spec ()
+  ((name :initarg :name :reader spec-name)
+   (description :initarg :description :reader spec-description)
+   (expectations :initarg :expectations :reader spec-expectations))
+  (:default-initargs :expectations nil))
+
+(defun ensure-spec (name &optional description)
+  (setf (gethash name *specs*) (make-instance 'spec :name name :description description)))
+
+(defun remove-spec (name)
+  (remhash name *specs*))
+
 (defun run-spec (name-or-spec))
 
 (defmacro it (&body body)
