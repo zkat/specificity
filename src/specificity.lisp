@@ -14,3 +14,9 @@
 (defun ensure-spec (name))
 (defun remove-spec (name))
 (defun run-spec (name-or-spec))
+
+(defmacro it (&body body)
+  (declare (ignore body))
+  `(error "Can't call IT outside of SPEC."))
+
+(defgeneric expectationp (maybe-expectation))
