@@ -102,42 +102,56 @@
       (is (string= "checkme" (description example))))
     (remove-spec 'test-spec)))
 
+(spec make-example
+  (it "should return an example object."
+    (is (examplep (make-example "foo" (lambda () t)))))
+  (it "should require a description."
+    (signals error (make-example))
+    (finishes (make-example "foo")))
+  (it "should use its first argument as the example's description."
+    (let* ((description "desc")
+           (example (make-example "desc")))
+      (is (eq description (example-description example)))))
+  (it "should accept an optional second argument which it will use as the example's function."
+    (is (examplep (make-example "foo")))
+    (let* ((function (lambda () t))
+           (example (make-example "foo" function)))
+      (is (eq function (example-function example)))))
+  (it "should create an object that holds the description and function given to it."
+    (let ((description "foo")
+          (function (lambda () t)))
+      (let ((example (make-example description function)))
+        (is (eq description (example-description example)))
+        (is (eq function (example-function example)))))))
+
+(spec example-description
+  (it "should return the example's description."
+    (let* ((description "foo")
+           (example (make-example description (lambda () t))))
+      (is (eq description (example-description example))))))
+
+(spec example-function
+  (it "should return the example's function."
+    (let* ((function (lambda () t))
+           (example (make-example "foo" function)))
+      (is (eq function (example-function example))))))
+
+(spec examplep
+  (it "should return true when passed an example object."
+    (let ((example (make-example "foo" (lambda () t))))
+      (is (examplep example)))))
+
 (spec run-example
   (it "should allow you to execute an example object."
     (let ((example (make-example "description" (lambda () t))))
       (finishes (run-example example))))
   (it "should return an object representing the results of executing the example."
     (let ((example (make-example "description" (lambda () t))))
-      (is (resultp (run-example example))))))
+      (is (resultp (run-example example)))))
+  (it "should finish even if the body of its function errors."
+    (let ((example (make-example "description" (lambda () (error "Something went wrong.")))))
+      (finishes (run-example example)))))
 
-(spec make-example
-  (it "should require a description and an example function."
-    (signals error (make-example))
-    (signals error (make-example "foo"))
-    (finishes (make-example "foo" (lambda () t))))
-  (it "should return an example object."
-    (is (examplep (make-example "foo" (lambda () t))))))
-
-(spec example-function
-  (it "should return a function."
-    (spec test-spec (is "an example"))
-    (let* ((spec (find-spec 'test-spec))
-           (example (elt (spec-examples spec) 0)))
-      (is (functionp (example-function example))))
-    (remove-spec 'test-spec))
-  (it "should capture its definition environment."
-    (let ((value nil))
-      (let ((x 'sentinel))
-        (spec test-spec (is "an example" (setf value x))))
-      (let ((spec (find-spec 'test-spec))
-            (example (elt (spec-examples spec) 0)))
-        (funcall (example-function example))
-        (is (eq 'sentinel value))))
-    (remove-spec 'test-spec)))
-
-(spec examplep
-  (it "should return true when passed an example object."
-    (spec test-spec)
-    (let ((example (elt (spec-examples (find-spec 'test-spec)) 0)))
-      (is (examplep example)))
-    (remove-spec 'test-spec)))
+;;;
+;;; Results
+;;;
