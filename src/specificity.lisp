@@ -38,27 +38,37 @@
 
 (defmethod resultp ((result result)) t)
 
-(defmacro it (&body body)
-  (declare (ignore body))
-  `(error "Can't call IT outside of SPEC."))
-
 ;;;
 ;;; Examples
 ;;;
-(defun make-example (description example-function)
-  (make-instance 'example :description description :function example-function))
+(defmacro it (description &body body)
+  `(make-example ,description ,@(when body `((lambda () ,@body)))))
 
-(defgeneric examplep (maybe-example)
-  (:method ((example t)) nil)
-  (:method ((example example)) t))
-
-(defun run-example (example)
-  ;; TODO
-  )
 (defgeneric example-description (example))
 (defgeneric example-function (example)
   (:documentation "Compiled function that represents the example's executable body."))
 
+(defgeneric examplep (maybe-example)
+  (:method ((example t)) nil))
+
+(defvar *results*)
+(defun run-example (example)
+  (let ((*results* nil))
+    (handler-case (funcall (example-function example))
+      (error (e) (push (make-failure e) *results*)))
+    *results*))
+
 (defclass example ()
   ((description :initarg :description :reader example-description)
    (function :initarg :function :reader example-function)))
+
+(defmethod examplep ((x example)) t)
+
+(defun make-example (description &optional example-function)
+  (make-instance 'example :description description :function example-function))
+
+;;;
+;;; Results
+;;;
+(defgeneric resultp (maybe-result)
+  (:method ((else t)) nil))
