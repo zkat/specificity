@@ -51,10 +51,16 @@
     (is (null (find-spec 'test-spec)))))
 
 (spec remove-spec
-  (it "should remove specs, by name."
+  (it "should remove specs."
     (spec test-spec)
     (remove-spec 'test-spec)
     (is (null (find-spec 'test-spec))))
+  (it "should error if something other than a symbol is given as the name."
+    (spec test-spec)
+    (signals 'error (remove-spec 1))
+    (signals 'error (remove-spec "test-spec"))
+    (signals 'error (remove-spec 1))
+    (finishes (remove-spec 'test-spec)))
   (it "should return true when a spec with that name already exists."
     (spec test-spec)
     (is (remove-spec 'test-spec)))
