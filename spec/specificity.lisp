@@ -11,7 +11,7 @@
     (is (find-spec 'test-spec))
     (remove-spec 'test-spec))
   (it "should only accept symbols as spec names."
-    (finishesp (spec test-spec))
+    (finishes (spec test-spec))
     (signals 'error (spec "string-name"))
     (is (find-spec 'test-spec))
     (remove-spec 'test-spec))
@@ -30,6 +30,16 @@
   (it "should return true when passed a spec object."
     (spec test-spec)
     (is (specp (find-spec 'test-spec)))
+    (remove-spec 'test-spec)))
+
+(spec ensure-spec
+  (it "should define a spec."
+    (ensure-spec 'test-spec)
+    (is (specp (find-spec 'test-spec)))
+    (remove-spec 'test-spec))
+  (it "should define a spec with the name given."
+    (ensure-spec 'test-spec)
+    (is (eq 'test-spec (spec-name (find-spec 'test-spec))))
     (remove-spec 'test-spec)))
 
 (spec find-spec
