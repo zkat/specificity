@@ -101,7 +101,26 @@
       (is (string= "checkme" (description expectation))))
     (remove-spec 'test-spec)))
 
-(spec spec-expectations)
+(spec run-expectation)
+
+(spec expectation-lambda
+  (it "should return a function."
+    (spec test-spec (is "an expectation"))
+    (let* ((spec (find-spec 'test-spec))
+           (expectation (elt (spec-expectations spec) 0)))
+      (is (functionp (expectation-lambda expectation))))
+    (remove-spec 'test-spec))
+  (it "should capture its definition environment."
+    (let ((value nil))
+      (let ((x 'sentinel))
+        (spec test-spec (is "an expectation" (setf value x))))
+      (let ((spec (find-spec 'test-spec))
+            (expectation (elt (spec-expectations spec) 0)))
+        (funcall (expectation-lambda expectation))
+        (is (eq 'sentinel value))))
+    (remove-spec 'test-spec)))
+
+(spec expectation-results)
 
 (spec expectationp
   (it "should return true when passed an expectation object."
