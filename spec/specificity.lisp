@@ -96,11 +96,14 @@
     (finishes (it "requires a description")))
   (it "should allow examples defined with a null body."
     (finishes (it "Spec goes here.")))
-  (it "must use the first argument as the example's description."
-    (spec test-spec (it "checkme"))
-    (let ((example (elt (spec-examples (find-spec 'test-spec)) 0)))
-      (is (string= "checkme" (description example))))
-    (remove-spec 'test-spec)))
+  (it "should capture its surrounding lexical environment in its body."
+    (let ((value nil))
+      (let ((example
+             (let ((sentinel 'sentinel))
+               (it "desc"
+                 (setf value sentinel)))))
+        (run-example example)
+        (is (= 'sentinel value))))))
 
 (spec make-example
   (it "should return an example object."
@@ -145,9 +148,9 @@
   (it "should allow you to execute an example object."
     (let ((example (make-example "description" (lambda () t))))
       (finishes (run-example example))))
-  (it "should return an object representing the results of executing the example."
+  (it "should return a sequence of results."
     (let ((example (make-example "description" (lambda () t))))
-      (is (resultp (run-example example)))))
+      (is (every #'resultp (run-example example)))))
   (it "should finish even if the body of its function errors."
     (let ((example (make-example "description" (lambda () (error "Something went wrong.")))))
       (finishes (run-example example)))))
