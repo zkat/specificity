@@ -84,24 +84,18 @@
 (def-spec-group examples :in specificity)
 (in-spec-group examples)
 
+;;;
+;;; Examples
+;;;
+
 (spec it
-  (it "should be callable from within the SPEC macro."
-    (finishes (spec test-spec (it "should be callable from within the SPEC macro.")))
-    (remove-spec 'test-spec))
-  (it "should signal an error if called outside of the SPEC macro."
-    (signalsp 'error (it "should signal an error if called outside of the SPEC macro.")))
+  (it "should return an example object."
+    (is (examplep (it "description"))))
   (it "must require a first argument describing its purpose, erroring if it does not receive one."
-    (signals 'error (spec test-spec (it)))
-    (remove-spec 'test-spec)
-    (finishes (spec test-spec (it "requires a description")))
-    (remove-spec 'test-spec))
+    (signals 'error (it))
+    (finishes (it "requires a description")))
   (it "should allow examples defined with a null body."
-    (finishes (spec test-spec (it "Spec goes here.")))
-    (remove-spec 'test-spec))
-  (it "must define an example for the spec."
-    (spec test-spec (it "is expected"))
-    (is (examplep (elt (spec-examples (find-spec 'test-spec)) 0)))
-    (remove-spec 'test-spec))
+    (finishes (it "Spec goes here.")))
   (it "must use the first argument as the example's description."
     (spec test-spec (it "checkme"))
     (let ((example (elt (spec-examples (find-spec 'test-spec)) 0)))
