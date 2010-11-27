@@ -73,17 +73,17 @@
 
 (spec it
   (it "should be callable from within the SPEC macro."
-    (finishesp (spec test-spec (it "should be callable from within the SPEC macro.")))
+    (finishes (spec test-spec (it "should be callable from within the SPEC macro.")))
     (remove-spec 'test-spec))
   (it "should signal an error if called outside of the SPEC macro."
     (signalsp 'error (it "should signal an error if called outside of the SPEC macro.")))
   (it "must require a first argument describing its purpose, erroring if it does not receive one."
-    (signalsp 'error (spec test-spec (it)))
+    (signals 'error (spec test-spec (it)))
     (remove-spec 'test-spec)
-    (finishesp (spec test-spec (it "requires a description")))
+    (finishes (spec test-spec (it "requires a description")))
     (remove-spec 'test-spec))
   (it "should allow expectations defined with a null body."
-    (finishesp (spec test-spec (it "Spec goes here.")))
+    (finishes (spec test-spec (it "Spec goes here.")))
     (remove-spec 'test-spec))
   (it "must define an expectation for the spec."
     (spec test-spec (it "is expected"))
