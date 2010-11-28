@@ -56,7 +56,7 @@
                         (push (make-pending *example* (example-description example))
                               *results*)))
       (error (e) (push (make-failure *example* e) *results*)))
-    *results*))
+    (nreverse *results*)))
 
 (defclass example ()
   ((description :initarg :description :reader example-description)

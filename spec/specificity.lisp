@@ -146,6 +146,13 @@
   (it "should return a sequence of results."
     (let ((example (make-example "description" (lambda () t))))
       (is (every #'resultp (run-example example)))))
+  (it "should return multiple results when there are multiple expectations, in the order they were executed."
+    (let* ((example (make-example "x" (lambda () (is t) (is nil) (pending "just chillin'"))))
+           (results (run-example example)))
+      (is (every #'resultp results))
+      (is (successp (elt results 0)))
+      (is (failurep (elt results 1)))
+      (is (pendingp (elt results 2)))))
   (it "should finish even if the body of its function errors."
     (let ((example (make-example "description" (lambda () (error "Something went wrong.")))))
       (finishes (run-example example))))
