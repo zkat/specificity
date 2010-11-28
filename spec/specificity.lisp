@@ -76,11 +76,6 @@
 
 (spec spec-examples)
 
-(def-spec-group results :in specificity)
-(in-spec-group results)
-
-(spec resultp)
-
 (def-spec-group examples :in specificity)
 (in-spec-group examples)
 
@@ -158,3 +153,7 @@
 ;;;
 ;;; Results
 ;;;
+(def-spec-group results :in specificity)
+(in-spec-group results)
+
+(spec resultp)
