@@ -49,7 +49,7 @@
 (defun run-example (example)
   (let ((*results* nil))
     (handler-case (funcall (example-function example))
-      (error (e) (push (make-failure e) *results*)))
+      (error (e) (push (make-failure example e) *results*)))
     *results*))
 
 (defclass example ()
@@ -66,8 +66,11 @@
 ;;;
 (defgeneric resultp (maybe-result)
   (:method ((else t)) nil))
-
 (defgeneric successp (maybe-success))
 (defgeneric failurep (maybe-failure))
 (defgeneric pendingp (maybe-pending))
 (defgeneric pending-explanation (pending))
+
+(defgeneric make-success (example))
+(defgeneric make-failure (example reason))
+(defgeneric make-pending (example explanation))
