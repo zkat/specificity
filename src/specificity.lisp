@@ -32,12 +32,6 @@
   ;; TODO
   )
 
-(defgeneric resultp (maybe-result))
-
-(defclass result () ())
-
-(defmethod resultp ((result result)) t)
-
 ;;;
 ;;; Examples
 ;;;
