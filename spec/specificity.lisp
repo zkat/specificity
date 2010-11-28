@@ -148,7 +148,67 @@
       (is (every #'resultp (run-example example)))))
   (it "should finish even if the body of its function errors."
     (let ((example (make-example "description" (lambda () (error "Something went wrong.")))))
-      (finishes (run-example example)))))
+      (finishes (run-example example))))
+  (it "should return a pending result in its results when the example has a null function."
+    (let* ((example (make-example "description"))
+           (result (elt (run-example example) 0)))
+      (is (pendingp result)))))
+
+;;;
+;;; Expectations
+;;;
+(spec is
+  (it "should add a success to its example's results when its body evaluates to TRUE."
+    (let* ((example (make-example "is" (lambda () (is (= 1 1)))))
+           (results (run-example example)))
+      (is (successp (elt results 0)))))
+  (it "should add a failure to its example's results when its body evaluates to FALSE."
+    (let* ((example (make-example "is" (lambda () (is (= 1 2)))))
+           (results (run-example example)))
+      (is (failurep (elt results 0)))))
+  (it "should add a failure to its example's results when its body signals an error."
+    (let ((example (make-example "is" (lambda () (error "Failwhale"))))
+          (results (run-example example)))
+      (is (failurep (elt results 0)))))
+  (it "should simply return its result object when called outside of an example's scope."))
+
+(spec pending
+  (it "should add a pending result to the example's results."
+    (let* ((example (make-example "pending" (lambda () (pending))))
+           (result (elt (run-example example) 0)))
+      (is (pendingp result))))
+  (it "should accept an argument to be used as its explanation."
+    (let* ((explanation "some reason")
+           (example (make-example "pending" (lambda () (pending explanation))))
+           (result (elt (run-example example) 0)))
+      (is (eq explanation (pending-explanation result))))))
+
+(spec pending-explanation)
+
+(spec finishes
+  (it "should report a success when its body executes completely."
+    (let* ((example (make-example "finishes" (lambda () (finishes 1 2 3))))
+           (result (elt (run-example example) 0)))
+      (is (successp result))))
+  (it "should fail when its body executes a non-local exit."))
+
+(spec signals
+  (it "should report a success when its body signals an unhandled condition of the declared type."
+    (let* ((example (make-example "signals" (lambda () (signals error (error "foo")))))
+           (result (elt (run-example example) 0)))
+      (is (successp result))))
+  (it "should report a failure when its body fails to signal the expected condition."
+    (let* ((example (make-example "signals" (lambda () (signals error "Problem, officer?"))))
+           (result (elt (run-example example) 0)))
+      (is (failurep result))))
+  (it "should report a success when its body signals a condition that is a subtype of the declared condition type."
+    (let* ((example (make-example "signals" (lambda () (signals error (error 'type-error)))))
+           (result (elt (run-example example) 0)))
+      (is (successp result))))
+  (it "should report a failure when its body signals a condition that is NOT a subtype of the declared condition type."
+    (let* ((example (make-example "signals" (lambda () (signals error (warn "foo")))))
+           (result (elt (run-example example) 0)))
+      (is (failurep result)))))
 
 ;;;
 ;;; Results

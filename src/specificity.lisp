@@ -66,3 +66,8 @@
 ;;;
 (defgeneric resultp (maybe-result)
   (:method ((else t)) nil))
+
+(defgeneric successp (maybe-success))
+(defgeneric failurep (maybe-failure))
+(defgeneric pendingp (maybe-pending))
+(defgeneric pending-explanation (pending))
