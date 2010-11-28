@@ -50,7 +50,11 @@
 (defun run-example (example)
   (let ((*results* nil)
         (*example* example))
-    (handler-case (funcall (example-function example))
+    (handler-case (let ((function (example-function example)))
+                    (if function
+                        (funcall function)
+                        (push (make-pending *example* (example-description example))
+                              *results*)))
       (error (e) (push (make-failure *example* e) *results*)))
     *results*))
 
@@ -81,7 +85,7 @@
     (unwind-protect (progn (funcall function) (setf finishedp t))
       (if finishedp
           (push (make-success *example*) *results*)
-          (push (make-failure *example* "Non-local exit detected.") *results*)))))
+          (push (make-failure *example* (format nil "~S did not finish." form)) *results*)))))
 
 (defmacro finishes (form)
   `(%finishes ,form (lambda () ,form)))
@@ -91,9 +95,16 @@
     (handler-case (funcall function)
       (t (e) (if (typep e condition)
                  (push (make-success *example*) *results*)
-                 (push (make-failure *example* "Got a condition, but not expected type.") *results*))))
+                 (push (make-failure
+                        *example*
+                        (format nil "Got a condition of type ~A while executing ~S, but expected a ~A."
+                                (type-of e) form condition))
+                       *results*))))
     (unless condition-signaled-p
-      (push (make-failure *example* "Didn't get a condition.") *results*))))
+      (push (make-failure *example*
+                          (format nil "~S did not signal a condition of type ~A"
+                                  form condition))
+            *results*))))
 
 (defmacro signals (condition-spec form)
   `(%signals ,condition-spec ,form (lambda () ,form)))
@@ -107,7 +118,24 @@
 (defgeneric failurep (maybe-failure))
 (defgeneric pendingp (maybe-pending))
 (defgeneric pending-explanation (pending))
+(defgeneric failure-reason (failure))
 
-(defgeneric make-success (example))
-(defgeneric make-failure (example reason))
-(defgeneric make-pending (example explanation))
+(defclass result () ())
+(defclass success (result) ())
+(defclass failure (result) ((reason :initarg :reason :reader failure-reason)))
+(defclass pending (result) ((explanation :initarg :explanation :reader pending-explanation)))
+
+(defmethod resultp ((result result)) t)
+(defmethod successp ((x success)) t)
+(defmethod failurep ((x failure)) t)
+(defmethod pendingp ((x pending)) t)
+
+(defgeneric make-success (example)
+  (:method ((example example))
+    (make-instance 'success)))
+(defgeneric make-failure (example reason)
+  (:method ((example example) reason)
+    (make-instance 'failure :reason reason)))
+(defgeneric make-pending (example explanation)
+  (:method ((example example) explanation)
+    (make-instance 'pending :explanation explanation)))
