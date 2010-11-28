@@ -46,10 +46,12 @@
   (:method ((example t)) nil))
 
 (defvar *results*)
+(defvar *example*)
 (defun run-example (example)
-  (let ((*results* nil))
+  (let ((*results* nil)
+        (*example* example))
     (handler-case (funcall (example-function example))
-      (error (e) (push (make-failure example e) *results*)))
+      (error (e) (push (make-failure *example* e) *results*)))
     *results*))
 
 (defclass example ()
@@ -64,10 +66,37 @@
 ;;;
 ;;; Expectations
 ;;;
-(defmacro is (&body body))
-(defmacro pending (&body body))
-(defmacro finishes (&body body))
-(defmacro signals (&body body))
+(defun %is (form function)
+  (if (funcall function)
+      (push (make-success *example*) *results*)
+      (push (make-failure *example* form) *results*)))
+(defmacro is (form)
+  `(%is ,form (lambda () ,form)))
+
+(defun pending (&optional explanation)
+  (push (make-pending *example* explanation) *results*))
+
+(defun %finishes (form function)
+  (let ((finishedp nil))
+    (unwind-protect (progn (funcall function) (setf finishedp t))
+      (if finishedp
+          (push (make-success *example*) *results*)
+          (push (make-failure *example* "Non-local exit detected.") *results*)))))
+
+(defmacro finishes (form)
+  `(%finishes ,form (lambda () ,form)))
+
+(defun %signals (condition form function)
+  (let ((condition-signaled-p nil))
+    (handler-case (funcall function)
+      (t (e) (if (typep e condition)
+                 (push (make-success *example*) *results*)
+                 (push (make-failure *example* "Got a condition, but not expected type.") *results*))))
+    (unless condition-signaled-p
+      (push (make-failure *example* "Didn't get a condition.") *results*))))
+
+(defmacro signals (condition-spec form)
+  `(%signals ,condition-spec ,form (lambda () ,form)))
 
 ;;;
 ;;; Results
