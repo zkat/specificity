@@ -62,6 +62,14 @@
   (make-instance 'example :description description :function example-function))
 
 ;;;
+;;; Expectations
+;;;
+(defmacro is (&body body))
+(defmacro pending (&body body))
+(defmacro finishes (&body body))
+(defmacro signals (&body body))
+
+;;;
 ;;; Results
 ;;;
 (defgeneric resultp (maybe-result)
