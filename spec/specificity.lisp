@@ -183,8 +183,6 @@
            (result (elt (run-example example) 0)))
       (is (eq explanation (pending-explanation result))))))
 
-(spec pending-explanation)
-
 (spec finishes
   (it "should report a success when its body executes completely."
     (let* ((example (make-example "finishes" (lambda () (finishes 1 2 3))))
@@ -217,3 +215,9 @@
 (in-spec-group results)
 
 (spec resultp)
+(spec successp)
+(spec pendingp)
+(spec pending-explanation)
+(spec make-success)
+(spec make-failure)
+(spec make-pending)
