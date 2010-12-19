@@ -23,7 +23,7 @@
     (remove-spec 'test-spec))
   (it "should allow an optional docstring right after the name."
     (spec test-spec "checkme")
-    (is (string= "checkme" (description (find-spec 'test-spec))))
+    (is (string= "checkme" (spec-description (find-spec 'test-spec))))
     (remove-spec 'test-spec)))
 
 (spec specp
