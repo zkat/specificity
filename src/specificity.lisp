@@ -6,11 +6,10 @@
   (:documentation "Name for spec."))
 (defgeneric spec-expectations (spec)
   (:documentation "Sequence of expectations."))
-(defgeneric specp (maybe-spec))
-(defmacro spec (name &body body)
-  `(progn ,name ,@body))
+(defgeneric specp (maybe-spec)
+  (:method ((anything t)) nil))
 
-(defparameter *specs* (make-hash-table :test 'eq))
+(defvar *specs* (make-hash-table :test 'eq))
 (defun find-spec (name)
   (values (gethash name *specs*)))
 
@@ -20,12 +19,20 @@
    (expectations :initarg :expectations :reader spec-expectations))
   (:default-initargs :expectations nil))
 
+(defmethod specp ((spec spec)) t)
+
 (defun ensure-spec (name &key description expectations)
+  (assert (symbolp name))
   (setf (gethash name *specs*) (make-instance 'spec :name name
                                               :description description
                                               :expectations expectations)))
+(defmacro spec (name &body body)
+  (let ((description (when (stringp (car body))
+                       (pop body))))
+    `(ensure-spec ',name :description ,description)))
 
 (defun remove-spec (name)
+  (assert (symbolp name))
   (remhash name *specs*))
 
 (defun run-spec (name-or-spec)
