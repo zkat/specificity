@@ -75,7 +75,7 @@
       (push (make-success *example*) *results*)
       (push (make-failure *example* form) *results*)))
 (defmacro is (form)
-  `(%is ,form (lambda () ,form)))
+  `(%is ',form (lambda () ,form)))
 
 (defun pending (&optional explanation)
   (push (make-pending *example* explanation) *results*))
@@ -88,7 +88,7 @@
           (push (make-failure *example* (format nil "~S did not finish." form)) *results*)))))
 
 (defmacro finishes (form)
-  `(%finishes ,form (lambda () ,form)))
+  `(%finishes ',form (lambda () ,form)))
 
 (defun %signals (condition form function)
   (let ((condition-signaled-p nil))
@@ -107,7 +107,7 @@
             *results*))))
 
 (defmacro signals (condition-spec form)
-  `(%signals ,condition-spec ,form (lambda () ,form)))
+  `(%signals ',condition-spec ',form (lambda () ,form)))
 
 ;;;
 ;;; Results
