@@ -93,13 +93,15 @@
 (defun %signals (condition form function)
   (let ((condition-signaled-p nil))
     (handler-case (funcall function)
-      (t (e) (if (typep e condition)
-                 (push (make-success *example*) *results*)
-                 (push (make-failure
-                        *example*
-                        (format nil "Got a condition of type ~A while executing ~S, but expected a ~A."
-                                (type-of e) form condition))
-                       *results*))))
+      (t (e)
+        (setf condition-signaled-p t)
+        (if (typep e condition)
+            (push (make-success *example*) *results*)
+            (push (make-failure
+                   *example*
+                   (format nil "Got a condition of type ~A while executing ~S, but expected a ~A."
+                           (type-of e) form condition))
+                  *results*))))
     (unless condition-signaled-p
       (push (make-failure *example*
                           (format nil "~S did not signal a condition of type ~A"
