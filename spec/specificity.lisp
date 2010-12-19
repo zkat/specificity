@@ -144,8 +144,10 @@
     (let ((example (make-example "description" (lambda () t))))
       (finishes (run-example example))))
   (it "should return a sequence of results."
-    (let ((example (make-example "description" (lambda () t))))
-      (is (every #'resultp (run-example example)))))
+    (let* ((example (make-example "description" (lambda () (is (= 1 2)) (is (= 1 1)))))
+           (results (run-example example)))
+      (is (not (null results)))
+      (is (every #'resultp results))))
   (it "should return multiple results when there are multiple expectations, in the order they were executed."
     (let* ((example (make-example "x" (lambda () (is t) (is nil) (pending "just chillin'"))))
            (results (run-example example)))
@@ -174,7 +176,7 @@
            (results (run-example example)))
       (is (failurep (elt results 0)))))
   (it "should add a failure to its example's results when its body signals an error."
-    (let ((example (make-example "is" (lambda () (error "Failwhale"))))
+    (let ((example (make-example "is" (lambda () (is (error "Failwhale")))))
           (results (run-example example)))
       (is (failurep (elt results 0)))))
   (it "should simply return its result object when called outside of an example's scope."))
@@ -195,7 +197,10 @@
     (let* ((example (make-example "finishes" (lambda () (finishes 1 2 3))))
            (result (elt (run-example example) 0)))
       (is (successp result))))
-  (it "should fail when its body executes a non-local exit."))
+  (it "should fail when its body executes a non-local exit."
+    (let* ((example (make-example "finishes" (lambda () (finishes (error "FAILWHALE")))))
+           (result (elt (run-example example) 0)))
+      (is (failurep result)))))
 
 (spec signals
   (it "should report a success when its body signals an unhandled condition of the declared type."
