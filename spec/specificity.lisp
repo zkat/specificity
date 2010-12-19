@@ -1,9 +1,9 @@
 (in-package #:specificity)
 
-(def-spec-group specificity)
-(def-spec-group spec :in specificity)
+;; (def-spec-group specificity)
+;; (def-spec-group spec :in specificity)
 
-(in-spec-group spec)
+;; (in-spec-group spec)
 
 (spec spec
   (it "should allow you to define a basic spec with just a name."
@@ -76,8 +76,8 @@
 
 (spec spec-examples)
 
-(def-spec-group examples :in specificity)
-(in-spec-group examples)
+;; (def-spec-group examples :in specificity)
+;; (in-spec-group examples)
 
 ;;;
 ;;; Examples
@@ -223,8 +223,8 @@
 ;;;
 ;;; Results
 ;;;
-(def-spec-group results :in specificity)
-(in-spec-group results)
+;; (def-spec-group results :in specificity)
+;; (in-spec-group results)
 
 (spec resultp)
 (spec successp)
